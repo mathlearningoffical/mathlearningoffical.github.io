@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EduQuest: Learn & Unlock</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f4f8; }
+        .box { border: 2px solid #333; padding: 20px; margin: 20px auto; width: 300px; background: white; border-radius: 10px; }
+        .hidden { display: none; }
+        button { cursor: pointer; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>EduQuest 🚀</h1>
+
+    <div id="game-area" class="box">
+        <h3>Level 1: Math Challenge</h3>
+        <p>What is 5 + 7?</p>
+        <input type="number" id="answer">
+        <button onclick="checkAnswer()">Submit</button>
+        <p id="reward-msg" class="hidden">🎉 Correct! Your code is: <strong>MATH123</strong></p>
+    </div>
+
+    <div class="box">
+        <h3>Enter Secret Code</h3>
+        <input type="text" id="code-input" placeholder="Enter code here...">
+        <button onclick="redeemCode()">Redeem</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        // Logic for the Game
+        function checkAnswer() {
+            const ans = document.getElementById('answer').value;
+            if (ans == "12") {
+                document.getElementById('reward-msg').classList.remove('hidden');
+            } else {
+                alert("Not quite! Try again.");
+            }
+        }
+
+        // Logic for the Code Redemption
+        function redeemCode() {
+            const code = document.getElementById('code-input').value.toUpperCase();
+            const status = document.getElementById('status');
+            
+            if (code === "MATH123") {
+                status.innerText = "🌟 Achievement Unlocked: Math Whiz!";
+                status.style.color = "green";
+                // You could also redirect them to a new page here
+            } else {
+                status.innerText = "❌ Invalid Code";
+                status.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
