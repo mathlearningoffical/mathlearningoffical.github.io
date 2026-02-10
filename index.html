@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduQuest | Learn & Unlock</title>
+    <title>EduQuest | Live Edition</title>
     <style>
         :root { --primary: #4a90e2; --secondary: #2ecc71; --dark: #2c3e50; --light: #ecf0f1; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .hidden { display: none; }
-        input { width: 80%; padding: 10px; margin: 10px 0; border: 2px solid #ddd; border-radius: 5px; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { opacity: 0.8; transform: translateY(-2px); }
-        .reward-box { background: #fff3cd; border: 2px dashed #ffeeba; padding: 15px; margin-top: 20px; border-radius: 10px; }
-        .vault-list { text-align: left; background: #f9f9f9; padding: 15px; border-radius: 10px; }
-        nav { margin-bottom: 20px; }
-        .grade-badge { background: var(--secondary); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; }
+        input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; transition: 0.2s; }
+        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .reward-box { background: #fff3cd; border: 2px dashed #ffeeba; padding: 20px; margin-top: 20px; border-radius: 10px; color: #856404; }
+        .vault-list { text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #eee; }
+        .quiz-card { border: 1px solid #ddd; padding: 25px; border-radius: 12px; margin-top: 20px; background: #fff; }
+        select { padding: 10px; border-radius: 5px; width: 60%; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -27,45 +27,49 @@
             <h3>Login or Create Account</h3>
             <input type="email" id="auth-email" placeholder="Email Address">
             <input type="password" id="auth-password" placeholder="Password">
-            <div style="margin-top: 10px;">
+            <div>
                 <button onclick="handleAuth('login')">Login</button>
                 <button onclick="handleAuth('signup')" style="background: var(--secondary);">Create Account</button>
             </div>
         </div>
 
         <div id="game-section" class="hidden">
-            <div id="user-info">
-                <p>Welcome, <strong id="display-email"></strong>! <button onclick="logout()" style="padding: 5px 10px; background: #e74c3c;">Logout</button></p>
-            </div>
+            <p>Welcome, <strong id="user-tag"></strong> | <button onclick="logout()" style="background:#e74c3c; padding: 5px 10px;">Logout</button></p>
+            
+            <div class="quiz-card">
+                <h3>Select Your Grade</h3>
+                <select id="grade-select" onchange="startGradeQuiz()">
+                    <option value="">-- Choose Grade --</option>
+                    <script>
+                        for(let i=1; i<=12; i++) {
+                            document.write(`<option value="${i}">Grade ${i}</option>`);
+                        }
+                    </script>
+                </select>
 
-            <hr>
+                <div id="active-quiz" class="hidden">
+                    <hr>
+                    <p><strong>Question <span id="q-num">1</span> of 10</strong></p>
+                    <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
+                    <input type="text" id="q-input" placeholder="Type answer here...">
+                    <br>
+                    <button onclick="nextQuestion()">Submit Answer</button>
+                </div>
 
-            <h3>Pick a Grade Quiz</h3>
-            <select id="grade-selector" onchange="loadQuiz()">
-                <option value="">-- Choose Grade --</option>
-                <option value="1">Grade 1 (Math)</option>
-                <option value="5">Grade 5 (Science)</option>
-                <option value="12">Grade 12 (Physics)</option>
-            </select>
-
-            <div id="quiz-container" class="hidden">
-                <p id="question-text"></p>
-                <input type="text" id="quiz-answer" placeholder="Your answer...">
-                <button onclick="checkQuiz()">Submit Answer</button>
-                <div id="quiz-reward" class="reward-box hidden">
-                    🎉 Correct! Your code is: <strong id="earned-code"></strong>
+                <div id="grade-complete" class="reward-box hidden">
+                    <h3>🎉 Level Cleared!</h3>
+                    <p>Your secret code is: <strong id="final-code" style="font-size: 1.5em; letter-spacing: 2px;"></strong></p>
+                    <p>Copy this code and paste it into the Vault below to save your progress!</p>
                 </div>
             </div>
 
-            <hr>
-
-            <h3>Redeem a Code</h3>
-            <input type="text" id="redeem-input" placeholder="Enter code here...">
-            <button onclick="redeemCode()">Add to Vault</button>
-
-            <h3>Your Unlocked Vault</h3>
-            <div class="vault-list" id="vault-list">
-                <i>No codes found yet. Beat some quizzes!</i>
+            <div class="vault-list">
+                <h3>🔑 Your Rewards Vault</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="redeem-input" placeholder="Enter code..." style="margin: 0; flex: 1;">
+                    <button onclick="redeemCode()" style="margin: 0;">Redeem</button>
+                </div>
+                <div id="my-unlocked-codes" style="margin-top:15px; color: #2ecc71; line-height: 1.6;"></div>
             </div>
         </div>
     </div>
@@ -75,104 +79,128 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- 1. CONFIGURATION (REPLACE WITH YOUR KEYS) ---
+        // --- 1. FIREBASE CONFIG (YOUR ACTUAL KEYS) ---
         const firebaseConfig = {
-  apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
-  authDomain: "backend-2870f.firebaseapp.com",
-  databaseURL: "https://backend-2870f-default-rtdb.firebaseio.com",
-  projectId: "backend-2870f",
-  storageBucket: "backend-2870f.firebasestorage.app",
-  messagingSenderId: "103357825196",
-  appId: "1:103357825196:web:1645af7ca7f95339835f09"
-};
+            apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
+            authDomain: "backend-2870f.firebaseapp.com",
+            projectId: "backend-2870f",
+            storageBucket: "backend-2870f.firebasestorage.app",
+            messagingSenderId: "103357825196",
+            appId: "1:103357825196:web:1645af7ca7f95339835f09"
         };
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. QUIZ DATA (Grades 1-12) ---
-        const quizzes = {
-            "1": { q: "What is 5 + 3?", a: "8", code: "G1-MATH-88" },
-            "5": { q: "Which planet is known as the Red Planet?", a: "Mars", code: "G5-SPACE-X" },
-            "12": { q: "What is the unit of Force?", a: "Newton", code: "G12-PHYS-N" }
-            // Add more grades here following the same pattern!
-        };
+        // --- 2. 120 QUESTION ENGINE ---
+        const masterQuiz = {};
+        for (let g = 1; g <= 12; g++) {
+            masterQuiz[g] = {
+                code: `EDU-G${g}-GOLD`,
+                questions: []
+            };
+            // Default questions for testing - You can replace these with real ones!
+            for (let q = 1; q <= 10; q++) {
+                masterQuiz[g].questions.push({
+                    q: `Grade ${g} Challenge: What is ${g} times ${q}?`, 
+                    a: (g * q).toString() 
+                });
+            }
+        }
 
-        // --- 3. AUTH LOGIC ---
+        let currentGrade = null;
+        let currentQIndex = 0;
+
+        // --- 3. AUTHENTICATION ---
         async function handleAuth(type) {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            if(!email || !password) return alert("Please fill in both fields.");
+
             try {
                 if (type === 'signup') {
-                    const cred = await auth.createUserWithEmailAndPassword(email, password);
-                    await db.collection("users").doc(cred.user.uid).set({ unlockedCodes: [] });
-                    alert("Account Created!");
+                    const res = await auth.createUserWithEmailAndPassword(email, password);
+                    await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [] });
+                    alert("Account Created Successfully!");
                 } else {
                     await auth.signInWithEmailAndPassword(email, password);
                 }
-            } catch (err) { alert(err.message); }
+            } catch (e) { alert(e.message); }
         }
 
-        function logout() { auth.signOut(); location.reload(); }
+        function logout() { auth.signOut().then(() => location.reload()); }
 
-        // --- 4. GAME & DATABASE LOGIC ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('game-section').classList.remove('hidden');
-                document.getElementById('display-email').innerText = user.email;
-                listenToVault(user.uid);
+                document.getElementById('user-tag').innerText = user.email;
+                loadVault(user.uid);
             }
         });
 
-        function loadQuiz() {
-            const grade = document.getElementById('grade-selector').value;
-            if (!grade) return;
-            document.getElementById('quiz-container').classList.remove('hidden');
-            document.getElementById('question-text').innerText = quizzes[grade].q;
-            document.getElementById('quiz-reward').classList.add('hidden');
-            document.getElementById('quiz-answer').value = "";
+        // --- 4. QUIZ MECHANICS ---
+        function startGradeQuiz() {
+            currentGrade = document.getElementById('grade-select').value;
+            if (!currentGrade) return;
+            currentQIndex = 0;
+            document.getElementById('active-quiz').classList.remove('hidden');
+            document.getElementById('grade-complete').classList.add('hidden');
+            showQuestion();
         }
 
-        function checkQuiz() {
-            const grade = document.getElementById('grade-selector').value;
-            const userAns = document.getElementById('quiz-answer').value.trim().toLowerCase();
-            const realAns = quizzes[grade].a.toLowerCase();
+        function showQuestion() {
+            const qData = masterQuiz[currentGrade].questions[currentQIndex];
+            document.getElementById('q-num').innerText = currentQIndex + 1;
+            document.getElementById('q-text').innerText = qData.q;
+            document.getElementById('q-input').value = "";
+            document.getElementById('q-input').focus();
+        }
 
-            if (userAns === realAns) {
-                document.getElementById('quiz-reward').classList.remove('hidden');
-                document.getElementById('earned-code').innerText = quizzes[grade].code;
+        function nextQuestion() {
+            const userAns = document.getElementById('q-input').value.trim();
+            const correctAns = masterQuiz[currentGrade].questions[currentQIndex].a;
+
+            if (userAns === correctAns) {
+                currentQIndex++;
+                if (currentQIndex < 10) {
+                    showQuestion();
+                } else {
+                    document.getElementById('active-quiz').classList.add('hidden');
+                    document.getElementById('grade-complete').classList.remove('hidden');
+                    document.getElementById('final-code').innerText = masterQuiz[currentGrade].code;
+                }
             } else {
-                alert("Wrong answer! Try again.");
+                alert("Try again! Hint: It's a math multiplication.");
             }
         }
 
+        // --- 5. VAULT & DATABASE ---
         async function redeemCode() {
-            const code = document.getElementById('redeem-input').value.toUpperCase();
+            const code = document.getElementById('redeem-input').value.trim().toUpperCase();
             const user = auth.currentUser;
-            if (!code) return;
+            
+            let isValid = false;
+            for(let g in masterQuiz) { if(masterQuiz[g].code === code) isValid = true; }
 
-            // Check if code is valid (exists in our quiz data)
-            const allCodes = Object.values(quizzes).map(item => item.code);
-            if (allCodes.includes(code)) {
+            if (isValid && user) {
                 await db.collection("users").doc(user.uid).update({
                     unlockedCodes: firebase.firestore.FieldValue.arrayUnion(code)
                 });
+                alert("Victory! Code added to your vault.");
                 document.getElementById('redeem-input').value = "";
-                alert("Code Redeemed!");
             } else {
-                alert("Invalid Code!");
+                alert("Invalid code or already used!");
             }
         }
 
-        function listenToVault(uid) {
+        function loadVault(uid) {
             db.collection("users").doc(uid).onSnapshot(doc => {
-                const codes = doc.data().unlockedCodes;
-                const list = document.getElementById('vault-list');
-                list.innerHTML = codes.length ? "" : "<i>No codes found yet.</i>";
-                codes.forEach(c => {
-                    list.innerHTML += `<div>✅ Code: <strong>${c}</strong></div>`;
-                });
+                const data = doc.data();
+                const display = document.getElementById('my-unlocked-codes');
+                if(data && data.unlockedCodes) {
+                    display.innerHTML = data.unlockedCodes.map(c => `<span>⭐ ${c}</span><br>`).join("");
+                }
             });
         }
     </script>
