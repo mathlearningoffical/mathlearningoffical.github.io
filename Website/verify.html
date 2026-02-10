@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Account | EduQuest</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        button { background: #4a90e2; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        .resend { background: #2ecc71; margin-top: 10px; }
+        .status { color: #e74c3c; margin-top: 15px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📨 Check Your Inbox</h1>
+        <p>We sent a verification link to your Gmail. Please click it to continue.</p>
+        <div id="status-msg" class="status">Waiting for verification...</div>
+        
+        <button onclick="checkVerification()">I've Verified! Let me in</button>
+        <button class="resend" onclick="resendEmail()">Resend Email</button>
+        <p><a href="index.html">Back to Login</a></p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script>
+        // Use your same config keys here
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
+            authDomain: "backend-2870f.firebaseapp.com",
+            projectId: "backend-2870f",
+            storageBucket: "backend-2870f.firebasestorage.app",
+            messagingSenderId: "103357825196",
+            appId: "1:103357825196:web:1645af7ca7f95339835f09"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        async function checkVerification() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                // This forces Firebase to check the server for the latest verification status
+                await user.reload(); 
+                if (user.emailVerified) {
+                    alert("Success! You are verified.");
+                    window.location.href = "index.html"; // Send back to game
+                } else {
+                    document.getElementById('status-msg').innerText = "Still not verified. Please check your spam folder.";
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        }
+
+        async function resendEmail() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                try {
+                    await user.sendEmailVerification();
+                    alert("Email resent! Please check your Gmail again.");
+                } catch (e) {
+                    alert(e.message);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
