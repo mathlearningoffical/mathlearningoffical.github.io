@@ -6,71 +6,75 @@
     <title>Math Learning</title>
     <style>
         :root { --primary: #4a90e2; --secondary: #2ecc71; --dark: #2c3e50; --light: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 20px; text-align: center; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding-top: 70px; text-align: center; }
+        
+        /* TOP MENU BAR */
+        .navbar { position: fixed; top: 0; left: 0; right: 0; height: 60px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        .nav-logo { font-weight: bold; font-size: 1.5em; color: var(--primary); }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        
+        /* SPINNING GEAR */
+        .settings-gear { font-size: 24px; cursor: pointer; transition: transform 0.8s ease-in-out; display: inline-block; }
+        .settings-gear:hover { transform: rotate(180deg); color: var(--primary); }
+
         .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .hidden { display: none; }
         
-        /* Profile Section */
-        .profile-header { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 20px; }
-        .avatar { width: 60px; height: 60px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 3px solid var(--primary); }
-
-        /* Grade Grid */
-        .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
-        .grade-card { background: white; border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; transition: 0.3s; }
-        .grade-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .grade-card i { font-size: 40px; display: block; margin-bottom: 10px; }
-
+        /* UI Elements */
+        .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-top: 20px; }
+        .grade-card { background: #fff; border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; transition: 0.3s; }
+        .grade-card:hover { border-color: var(--primary); transform: translateY(-3px); }
         input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; }
         button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .reward-box { background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; margin: 20px 0; }
     </style>
 </head>
 <body>
 
+    <div class="navbar">
+        <div class="nav-logo">🚀 EduQuest</div>
+        <div class="nav-right" id="nav-info">
+            <span id="nav-user" style="font-size: 0.9em;"></span>
+            <span class="settings-gear" onclick="toggleSettings()">⚙️</span>
+        </div>
+    </div>
+
     <div class="container">
-        <h1>🚀 EduQuest</h1>
-        
         <div id="auth-section">
-            <h3>Login or Create Account</h3>
+            <h2>Welcome Back</h2>
             <input type="email" id="auth-email" placeholder="Gmail Address">
             <input type="password" id="auth-password" placeholder="Password">
             <div>
                 <button onclick="handleAuth('login')">Login</button>
-                <button onclick="handleAuth('signup')" style="background: var(--secondary);">Create Account</button>
+                <button onclick="handleAuth('signup')" style="background: var(--secondary);">Sign Up</button>
             </div>
-            <p id="auth-msg" style="color: red;"></p>
+        </div>
+
+        <div id="settings-menu" class="hidden" style="border: 1px solid #ddd; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <h3>User Settings</h3>
+            <p>Account Type: <span class="grade-badge">Student</span></p>
+            <button onclick="logout()" style="background: #e74c3c; padding: 5px 10px;">Sign Out</button>
+            <button onclick="toggleSettings()" style="background: #95a5a6;">Close</button>
         </div>
 
         <div id="game-section" class="hidden">
-            <div class="profile-header">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="avatar" id="user-avatar">👤</div>
-                    <div style="text-align: left;">
-                        <strong id="user-tag"></strong><br>
-                        <small>Verified Student ✅</small>
-                    </div>
-                </div>
-                <button onclick="logout()" style="background:#e74c3c; font-size: 12px;">Logout</button>
-            </div>
-
-            <h3>Choose Your Grade Level</h3>
-            <div class="grade-grid" id="grade-grid">
-                </div>
+            <h3>Choose Your Grade</h3>
+            <div class="grade-grid" id="grade-grid"></div>
 
             <div id="quiz-area" class="hidden">
                 <div class="grade-card" style="width: 100%; cursor: default;">
-                    <h2 id="current-grade-title">Grade X</h2>
-                    <p id="q-text" style="font-size: 1.5em;"></p>
+                    <h2 id="grade-title"></h2>
+                    <p id="q-text" style="font-size: 1.4em; color: var(--primary);"></p>
                     <input type="text" id="q-input" placeholder="Type answer...">
                     <br>
-                    <button onclick="nextQuestion()">Submit Answer</button>
+                    <button onclick="nextQuestion()">Submit</button>
+                    <button onclick="location.reload()" style="background:#95a5a6;">Back</button>
                 </div>
             </div>
 
-            <div id="grade-complete" class="reward-box hidden">
+            <div id="grade-complete" class="hidden" style="background: #d4edda; padding: 20px; border-radius: 10px;">
                 <h3>🎉 Grade Mastered!</h3>
-                <p>Secret Code: <strong id="final-code"></strong></p>
-                <button onclick="redeemAuto()">Add to My Vault</button>
+                <p>Unlock Code: <strong id="final-code"></strong></p>
+                <button onclick="redeemAuto()">Add to Vault</button>
             </div>
         </div>
     </div>
@@ -80,7 +84,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // PASTE YOUR REAL KEYS HERE
         const firebaseConfig = {
             apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
             authDomain: "backend-2870f.firebaseapp.com",
@@ -93,88 +96,99 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Grade Icons (Profile Pictures for Grades)
-        const gradeIcons = ["🌱", "🍀", "🌻", "🍎", "📚", "🧬", "🧪", "🌍", "⚖️", "🏛️", "🌌", "🎓"];
-
-        // 1. GENERATE GRADE CARDS
-        const grid = document.getElementById('grade-grid');
-        for(let i=1; i<=12; i++) {
-            grid.innerHTML += `
-                <div class="grade-card" onclick="startQuiz(${i})">
-                    <i>${gradeIcons[i-1]}</i>
-                    <strong>Grade ${i}</strong>
-                </div>
-            `;
+        // 1. ADVANCED QUESTION GENERATOR
+        function generateQuestions(grade) {
+            let qs = [];
+            for(let i=1; i<=10; i++) {
+                let q, a;
+                if(grade <= 3) {
+                    let val = i * 2;
+                    q = `What is ${val} + ${grade}?`; a = (val + grade).toString();
+                } else if(grade <= 6) {
+                    q = `What is ${grade} * ${i + 5}?`; a = (grade * (i + 5)).toString();
+                } else if(grade <= 9) {
+                    let x = i + 2;
+                    q = `Solve for x: ${grade}x = ${grade * x}`; a = x.toString();
+                } else {
+                    // GRADE 10-12 (Algebra 2 & Geometry)
+                    let base = i + 3;
+                    q = `What is the value of ${base} squared (x²)?`; a = (base * base).toString();
+                }
+                qs.push({q, a});
+            }
+            return qs;
         }
 
-        // 2. AUTHENTICATION WITH EMAIL VERIFICATION
+        // 2. UI INITIALIZATION
+        const icons = ["🌱","🍀","🌻","🍎","📚","🧬","🧪","🌍","⚖️","🏛️","🌌","🎓"];
+        const grid = document.getElementById('grade-grid');
+        for(let i=1; i<=12; i++) {
+            grid.innerHTML += `<div class="grade-card" onclick="startQuiz(${i})"><i>${icons[i-1]}</i><br>Grade ${i}</div>`;
+        }
+
+        // 3. AUTH & NAVIGATION
         async function handleAuth(type) {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-            const msg = document.getElementById('auth-msg');
-
             try {
                 if(type === 'signup') {
                     const res = await auth.createUserWithEmailAndPassword(email, password);
                     await res.user.sendEmailVerification();
-                    await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [], avatar: "👤" });
-                    alert("Verification email sent! Check your inbox.");
+                    await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [] });
+                    alert("Verification link sent to Gmail!");
                     auth.signOut();
                 } else {
                     const res = await auth.signInWithEmailAndPassword(email, password);
-                    if(!res.user.emailVerified) {
-                        alert("Please verify your email first!");
-                        auth.signOut();
-                    }
+                    if(!res.user.emailVerified) { alert("Verify your email first!"); auth.signOut(); }
                 }
-            } catch (e) { msg.innerText = e.message; }
+            } catch (e) { alert(e.message); }
         }
 
         auth.onAuthStateChanged(user => {
             if(user && user.emailVerified) {
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('game-section').classList.remove('hidden');
-                document.getElementById('user-tag').innerText = user.email;
+                document.getElementById('nav-user').innerText = user.email;
             }
         });
 
+        function toggleSettings() { document.getElementById('settings-menu').classList.toggle('hidden'); }
         function logout() { auth.signOut().then(() => location.reload()); }
 
-        // 3. QUIZ LOGIC
-        let curG, curQ = 0;
+        // 4. GAMEPLAY
+        let curG, curQIdx, activeQuestions;
         function startQuiz(g) {
-            curG = g; curQ = 0;
+            curG = g; curQIdx = 0;
+            activeQuestions = generateQuestions(g);
             document.getElementById('grade-grid').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('current-grade-title').innerText = `Grade ${g} Challenge`;
-            showQ();
+            document.getElementById('grade-title').innerText = `Grade ${g} Exam`;
+            updateQ();
         }
 
-        function showQ() {
-            document.getElementById('q-text').innerText = `What is ${curG} + ${curQ + 1}?`;
+        function updateQ() {
+            document.getElementById('q-text').innerText = activeQuestions[curQIdx].q;
             document.getElementById('q-input').value = "";
         }
 
         function nextQuestion() {
-            if(document.getElementById('q-input').value == (curG + curQ + 1)) {
-                curQ++;
-                if(curQ < 3) { // Shortened to 3 questions for testing
-                    showQ();
-                } else {
+            if(document.getElementById('q-input').value == activeQuestions[curQIdx].a) {
+                curQIdx++;
+                if(curQIdx < 10) updateQ();
+                else {
                     document.getElementById('quiz-area').classList.add('hidden');
                     document.getElementById('grade-complete').classList.remove('hidden');
-                    document.getElementById('final-code').innerText = `MASTER-G${curG}`;
+                    document.getElementById('final-code').innerText = `PRO-GRADE-${curG}`;
                 }
-            } else { alert("Try again!"); }
+            } else { alert("Incorrect! Focus and try again."); }
         }
 
         async function redeemAuto() {
             const code = document.getElementById('final-code').innerText;
-            const user = auth.currentUser;
-            await db.collection("users").doc(user.uid).update({
+            await db.collection("users").doc(auth.currentUser.uid).update({
                 unlockedCodes: firebase.firestore.FieldValue.arrayUnion(code)
             });
-            alert("Code saved to your vault!");
+            alert("Reward saved!");
             location.reload();
         }
     </script>
