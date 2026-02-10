@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduQuest | Live Edition</title>
+    <title>Math Learning</title>
     <style>
-        :root { --primary: #4a90e2; --secondary: #2ecc71; --dark: #2c3e50; --light: #ecf0f1; }
+        :root { --primary: #4a90e2; --secondary: #2ecc71; --dark: #2c3e50; --light: #f4f7f6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .hidden { display: none; }
-        input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
-        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 5px; transition: 0.2s; }
-        button:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .reward-box { background: #fff3cd; border: 2px dashed #ffeeba; padding: 20px; margin-top: 20px; border-radius: 10px; color: #856404; }
-        .vault-list { text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; border: 1px solid #eee; }
-        .quiz-card { border: 1px solid #ddd; padding: 25px; border-radius: 12px; margin-top: 20px; background: #fff; }
-        select { padding: 10px; border-radius: 5px; width: 60%; margin-bottom: 20px; }
+        
+        /* Profile Section */
+        .profile-header { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .avatar { width: 60px; height: 60px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 3px solid var(--primary); }
+
+        /* Grade Grid */
+        .grade-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
+        .grade-card { background: white; border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; transition: 0.3s; }
+        .grade-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .grade-card i { font-size: 40px; display: block; margin-bottom: 10px; }
+
+        input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .reward-box { background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -25,51 +32,45 @@
         
         <div id="auth-section">
             <h3>Login or Create Account</h3>
-            <input type="email" id="auth-email" placeholder="Email Address">
+            <input type="email" id="auth-email" placeholder="Gmail Address">
             <input type="password" id="auth-password" placeholder="Password">
             <div>
                 <button onclick="handleAuth('login')">Login</button>
                 <button onclick="handleAuth('signup')" style="background: var(--secondary);">Create Account</button>
             </div>
+            <p id="auth-msg" style="color: red;"></p>
         </div>
 
         <div id="game-section" class="hidden">
-            <p>Welcome, <strong id="user-tag"></strong> | <button onclick="logout()" style="background:#e74c3c; padding: 5px 10px;">Logout</button></p>
-            
-            <div class="quiz-card">
-                <h3>Select Your Grade</h3>
-                <select id="grade-select" onchange="startGradeQuiz()">
-                    <option value="">-- Choose Grade --</option>
-                    <script>
-                        for(let i=1; i<=12; i++) {
-                            document.write(`<option value="${i}">Grade ${i}</option>`);
-                        }
-                    </script>
-                </select>
+            <div class="profile-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="avatar" id="user-avatar">👤</div>
+                    <div style="text-align: left;">
+                        <strong id="user-tag"></strong><br>
+                        <small>Verified Student ✅</small>
+                    </div>
+                </div>
+                <button onclick="logout()" style="background:#e74c3c; font-size: 12px;">Logout</button>
+            </div>
 
-                <div id="active-quiz" class="hidden">
-                    <hr>
-                    <p><strong>Question <span id="q-num">1</span> of 10</strong></p>
-                    <p id="q-text" style="font-size: 1.2em; font-weight: bold;"></p>
-                    <input type="text" id="q-input" placeholder="Type answer here...">
+            <h3>Choose Your Grade Level</h3>
+            <div class="grade-grid" id="grade-grid">
+                </div>
+
+            <div id="quiz-area" class="hidden">
+                <div class="grade-card" style="width: 100%; cursor: default;">
+                    <h2 id="current-grade-title">Grade X</h2>
+                    <p id="q-text" style="font-size: 1.5em;"></p>
+                    <input type="text" id="q-input" placeholder="Type answer...">
                     <br>
                     <button onclick="nextQuestion()">Submit Answer</button>
                 </div>
-
-                <div id="grade-complete" class="reward-box hidden">
-                    <h3>🎉 Level Cleared!</h3>
-                    <p>Your secret code is: <strong id="final-code" style="font-size: 1.5em; letter-spacing: 2px;"></strong></p>
-                    <p>Copy this code and paste it into the Vault below to save your progress!</p>
-                </div>
             </div>
 
-            <div class="vault-list">
-                <h3>🔑 Your Rewards Vault</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="redeem-input" placeholder="Enter code..." style="margin: 0; flex: 1;">
-                    <button onclick="redeemCode()" style="margin: 0;">Redeem</button>
-                </div>
-                <div id="my-unlocked-codes" style="margin-top:15px; color: #2ecc71; line-height: 1.6;"></div>
+            <div id="grade-complete" class="reward-box hidden">
+                <h3>🎉 Grade Mastered!</h3>
+                <p>Secret Code: <strong id="final-code"></strong></p>
+                <button onclick="redeemAuto()">Add to My Vault</button>
             </div>
         </div>
     </div>
@@ -79,7 +80,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // --- 1. FIREBASE CONFIG (YOUR ACTUAL KEYS) ---
+        // PASTE YOUR REAL KEYS HERE
         const firebaseConfig = {
             apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
             authDomain: "backend-2870f.firebaseapp.com",
@@ -92,147 +93,89 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- 2. 120 QUESTION ENGINE ---
-        const masterQuiz = {};
-        for (let g = 1; g <= 12; g++) {
-            masterQuiz[g] = {
-                code: `EDU-G${g}-GOLD`,
-                questions: []
-            };
-            // Default questions for testing - You can replace these with real ones!
-            for (let q = 1; q <= 10; q++) {
-                masterQuiz[g].questions.push({
-                    q: `Grade ${g} Challenge: What is ${g} times ${q}?`, 
-                    a: (g * q).toString() 
-                });
-            }
+        // Grade Icons (Profile Pictures for Grades)
+        const gradeIcons = ["🌱", "🍀", "🌻", "🍎", "📚", "🧬", "🧪", "🌍", "⚖️", "🏛️", "🌌", "🎓"];
+
+        // 1. GENERATE GRADE CARDS
+        const grid = document.getElementById('grade-grid');
+        for(let i=1; i<=12; i++) {
+            grid.innerHTML += `
+                <div class="grade-card" onclick="startQuiz(${i})">
+                    <i>${gradeIcons[i-1]}</i>
+                    <strong>Grade ${i}</strong>
+                </div>
+            `;
         }
 
-        let currentGrade = null;
-        let currentQIndex = 0;
+        // 2. AUTHENTICATION WITH EMAIL VERIFICATION
+        async function handleAuth(type) {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const msg = document.getElementById('auth-msg');
 
-        // --- 3. AUTHENTICATION ---
-// --- UPDATED AUTHENTICATION LOGIC ---
-async function handleAuth(type) {
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
-    if(!email || !password) return alert("Please fill in both fields.");
-
-    try {
-        if (type === 'signup') {
-            const res = await auth.createUserWithEmailAndPassword(email, password);
-            
-            // 1. Send the Verification Email
-            await res.user.sendEmailVerification();
-            
-            // 2. Create the Database profile
-            await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [] });
-            
-            alert("Account Created! Please check your Gmail to verify your account before logging in.");
-            await auth.signOut(); // Force sign out until they verify
-            location.reload();
-
-        } else {
-            const res = await auth.signInWithEmailAndPassword(email, password);
-            
-            // 3. Check if Verified during Login
-            if (!res.user.emailVerified) {
-                alert("Please verify your email address first! Check your inbox.");
-                await auth.signOut();
-            }
+            try {
+                if(type === 'signup') {
+                    const res = await auth.createUserWithEmailAndPassword(email, password);
+                    await res.user.sendEmailVerification();
+                    await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [], avatar: "👤" });
+                    alert("Verification email sent! Check your inbox.");
+                    auth.signOut();
+                } else {
+                    const res = await auth.signInWithEmailAndPassword(email, password);
+                    if(!res.user.emailVerified) {
+                        alert("Please verify your email first!");
+                        auth.signOut();
+                    }
+                }
+            } catch (e) { msg.innerText = e.message; }
         }
-    } catch (e) { alert(e.message); }
-}
-
-// --- UPDATED AUTH STATE LISTENER ---
-auth.onAuthStateChanged(user => {
-    // Only let them in if they are logged in AND verified
-    if (user && user.emailVerified) {
-        document.getElementById('auth-section').classList.add('hidden');
-        document.getElementById('game-section').classList.remove('hidden');
-        document.getElementById('user-tag').innerText = user.email;
-        loadVault(user.uid);
-    } else {
-        // Keep them at the login screen
-        document.getElementById('auth-section').classList.remove('hidden');
-        document.getElementById('game-section').classList.add('hidden');
-    }
-});
-
-        function logout() { auth.signOut().then(() => location.reload()); }
 
         auth.onAuthStateChanged(user => {
-            if (user) {
+            if(user && user.emailVerified) {
                 document.getElementById('auth-section').classList.add('hidden');
                 document.getElementById('game-section').classList.remove('hidden');
                 document.getElementById('user-tag').innerText = user.email;
-                loadVault(user.uid);
             }
         });
 
-        // --- 4. QUIZ MECHANICS ---
-        function startGradeQuiz() {
-            currentGrade = document.getElementById('grade-select').value;
-            if (!currentGrade) return;
-            currentQIndex = 0;
-            document.getElementById('active-quiz').classList.remove('hidden');
-            document.getElementById('grade-complete').classList.add('hidden');
-            showQuestion();
+        function logout() { auth.signOut().then(() => location.reload()); }
+
+        // 3. QUIZ LOGIC
+        let curG, curQ = 0;
+        function startQuiz(g) {
+            curG = g; curQ = 0;
+            document.getElementById('grade-grid').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            document.getElementById('current-grade-title').innerText = `Grade ${g} Challenge`;
+            showQ();
         }
 
-        function showQuestion() {
-            const qData = masterQuiz[currentGrade].questions[currentQIndex];
-            document.getElementById('q-num').innerText = currentQIndex + 1;
-            document.getElementById('q-text').innerText = qData.q;
+        function showQ() {
+            document.getElementById('q-text').innerText = `What is ${curG} + ${curQ + 1}?`;
             document.getElementById('q-input').value = "";
-            document.getElementById('q-input').focus();
         }
 
         function nextQuestion() {
-            const userAns = document.getElementById('q-input').value.trim();
-            const correctAns = masterQuiz[currentGrade].questions[currentQIndex].a;
-
-            if (userAns === correctAns) {
-                currentQIndex++;
-                if (currentQIndex < 10) {
-                    showQuestion();
+            if(document.getElementById('q-input').value == (curG + curQ + 1)) {
+                curQ++;
+                if(curQ < 3) { // Shortened to 3 questions for testing
+                    showQ();
                 } else {
-                    document.getElementById('active-quiz').classList.add('hidden');
+                    document.getElementById('quiz-area').classList.add('hidden');
                     document.getElementById('grade-complete').classList.remove('hidden');
-                    document.getElementById('final-code').innerText = masterQuiz[currentGrade].code;
+                    document.getElementById('final-code').innerText = `MASTER-G${curG}`;
                 }
-            } else {
-                alert("Try again! Hint: It's a math multiplication.");
-            }
+            } else { alert("Try again!"); }
         }
 
-        // --- 5. VAULT & DATABASE ---
-        async function redeemCode() {
-            const code = document.getElementById('redeem-input').value.trim().toUpperCase();
+        async function redeemAuto() {
+            const code = document.getElementById('final-code').innerText;
             const user = auth.currentUser;
-            
-            let isValid = false;
-            for(let g in masterQuiz) { if(masterQuiz[g].code === code) isValid = true; }
-
-            if (isValid && user) {
-                await db.collection("users").doc(user.uid).update({
-                    unlockedCodes: firebase.firestore.FieldValue.arrayUnion(code)
-                });
-                alert("Victory! Code added to your vault.");
-                document.getElementById('redeem-input').value = "";
-            } else {
-                alert("Invalid code or already used!");
-            }
-        }
-
-        function loadVault(uid) {
-            db.collection("users").doc(uid).onSnapshot(doc => {
-                const data = doc.data();
-                const display = document.getElementById('my-unlocked-codes');
-                if(data && data.unlockedCodes) {
-                    display.innerHTML = data.unlockedCodes.map(c => `<span>⭐ ${c}</span><br>`).join("");
-                }
+            await db.collection("users").doc(user.uid).update({
+                unlockedCodes: firebase.firestore.FieldValue.arrayUnion(code)
             });
+            alert("Code saved to your vault!");
+            location.reload();
         }
     </script>
 </body>
