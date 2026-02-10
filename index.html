@@ -112,21 +112,52 @@
         let currentQIndex = 0;
 
         // --- 3. AUTHENTICATION ---
-        async function handleAuth(type) {
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            if(!email || !password) return alert("Please fill in both fields.");
+// --- UPDATED AUTHENTICATION LOGIC ---
+async function handleAuth(type) {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    if(!email || !password) return alert("Please fill in both fields.");
 
-            try {
-                if (type === 'signup') {
-                    const res = await auth.createUserWithEmailAndPassword(email, password);
-                    await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [] });
-                    alert("Account Created Successfully!");
-                } else {
-                    await auth.signInWithEmailAndPassword(email, password);
-                }
-            } catch (e) { alert(e.message); }
+    try {
+        if (type === 'signup') {
+            const res = await auth.createUserWithEmailAndPassword(email, password);
+            
+            // 1. Send the Verification Email
+            await res.user.sendEmailVerification();
+            
+            // 2. Create the Database profile
+            await db.collection("users").doc(res.user.uid).set({ unlockedCodes: [] });
+            
+            alert("Account Created! Please check your Gmail to verify your account before logging in.");
+            await auth.signOut(); // Force sign out until they verify
+            location.reload();
+
+        } else {
+            const res = await auth.signInWithEmailAndPassword(email, password);
+            
+            // 3. Check if Verified during Login
+            if (!res.user.emailVerified) {
+                alert("Please verify your email address first! Check your inbox.");
+                await auth.signOut();
+            }
         }
+    } catch (e) { alert(e.message); }
+}
+
+// --- UPDATED AUTH STATE LISTENER ---
+auth.onAuthStateChanged(user => {
+    // Only let them in if they are logged in AND verified
+    if (user && user.emailVerified) {
+        document.getElementById('auth-section').classList.add('hidden');
+        document.getElementById('game-section').classList.remove('hidden');
+        document.getElementById('user-tag').innerText = user.email;
+        loadVault(user.uid);
+    } else {
+        // Keep them at the login screen
+        document.getElementById('auth-section').classList.remove('hidden');
+        document.getElementById('game-section').classList.add('hidden');
+    }
+});
 
         function logout() { auth.signOut().then(() => location.reload()); }
 
