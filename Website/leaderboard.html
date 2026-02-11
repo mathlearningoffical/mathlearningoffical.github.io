@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard | EduQuest</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; text-align: center; padding: 50px; }
+        .leaderboard-card { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; }
+        th { color: #4a90e2; }
+        .rank-1 { background: #fffdf0; font-weight: bold; }
+    </script>
+</head>
+<body>
+    <div class="leaderboard-card">
+        <h1>🏆 Top Scholars</h1>
+        <table id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Student</th>
+                    <th>Codes Unlocked</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                </tbody>
+        </table>
+        <br>
+        <a href="index.html">Back to Game</a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = { /* PASTE YOUR CONFIG HERE */ };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function loadLeaderboard() {
+            const snapshot = await db.collection("users").get();
+            let players = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                players.push({
+                    name: data.email ? data.email.split('@')[0] : "Anonymous",
+                    score: data.unlockedCodes ? data.unlockedCodes.length : 0
+                });
+            });
+
+            // Sort by score (highest first)
+            players.sort((a, b) => b.score - a.score);
+
+            const body = document.getElementById('leaderboard-body');
+            players.forEach((p, index) => {
+                body.innerHTML += `
+                    <tr class="${index === 0 ? 'rank-1' : ''}">
+                        <td>${index + 1}</td>
+                        <td>${p.name}</td>
+                        <td>${p.score} ⭐</td>
+                    </tr>`;
+            });
+        }
+        loadLeaderboard();
+    </script>
+</body>
+</html>
