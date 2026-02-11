@@ -37,6 +37,14 @@
             <span class="settings-gear" onclick="location.href='settings.html'">⚙️</span>
         </div>
     </div>
+    <div class="navbar">
+    <div class="nav-logo">🚀 EduQuest</div>
+    <div class="nav-right">
+        <button onclick="location.href='leaderboard.html'">🏆 Leaderboard</button>
+        <button onclick="location.href='codes.html'">🔑 Codes</button>
+        <span class="settings-gear" onclick="location.href='settings.html'">⚙️</span>
+    </div>
+</div>
 
     <div class="container">
         <div id="auth-section">
@@ -82,9 +90,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-
-    <script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDPk1zIZRAtOmHcyAIEZErl9JNSkXQPBv8",
             authDomain: "backend-2870f.firebaseapp.com",
@@ -119,28 +125,29 @@
         }
 
         // 2. AUTH & STATE
-        async function handleAuth(type) {
-            const e = document.getElementById('auth-email').value;
-            const p = document.getElementById('auth-password').value;
-            try {
-                if(type === 'signup') {
-                    const res = await auth.createUserWithEmailAndPassword(e, p);
-                    await res.user.sendEmailVerification();
-                    window.location.href = "verify.html";
-                } else {
-                    const res = await auth.signInWithEmailAndPassword(e, p);
-                    if(!res.user.emailVerified) { alert("Verify your Gmail!"); auth.signOut(); }
-                }
-            } catch (err) { alert(err.message); }
-        }
+       async function handleAuth(type) {
+    const e = document.getElementById('auth-email').value;
+    const p = document.getElementById('auth-password').value;
+    const u = prompt("Enter a username for the leaderboard:"); // Ask for username
 
-        auth.onAuthStateChanged(user => {
-            if(user && user.emailVerified) {
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('game-section').classList.remove('hidden');
-                setupGrid();
-            }
-        });
+    try {
+        if(type === 'signup') {
+            if(!u) return alert("Username required!");
+            const res = await auth.createUserWithEmailAndPassword(e, p);
+            await res.user.sendEmailVerification();
+            // Save username to Database
+            await db.collection("users").doc(res.user.uid).set({ 
+                username: u, 
+                unlockedCodes: [],
+                email: e 
+            });
+            window.location.href = "verify.html";
+        } else {
+            const res = await auth.signInWithEmailAndPassword(e, p);
+            if(!res.user.emailVerified) { alert("Verify Gmail!"); auth.signOut(); }
+        }
+    } catch (err) { alert(err.message); }
+}
 
         // 3. GAMEPLAY LOGIC
         let curG, solved = 0, currentQ = {};
