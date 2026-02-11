@@ -63,5 +63,34 @@
         }
         loadLeaderboard();
     </script>
+    <div class="navbar">
+    <div class="nav-logo">🚀 EduQuest</div>
+    <div class="nav-links">
+        <a href="leaderboard.html" style="margin-right: 15px; text-decoration: none; color: #4a90e2;">🏆 Leaderboard</a>
+        <span id="admin-btn" class="hidden"><a href="#" onclick="showAdminPanel()" style="color: red; margin-right: 15px;">👑 Admin</a></span>
+    </div>
+    <div class="nav-right">
+        <span class="settings-gear" onclick="location.href='settings.html'">⚙️</span>
+    </div>
+</div>
+
+<script>
+    // Inside your onAuthStateChanged(user => { ... })
+    if (user) {
+        // ADMIN CHECK (Replace with your actual email)
+        if (user.email === "youradmin@gmail.com") {
+            document.getElementById('admin-btn').classList.remove('hidden');
+        }
+    }
+
+    function showAdminPanel() {
+        let allCodes = "";
+        // This is a simple version - it shows the codes in an alert
+        for (let g in masterQuiz) {
+            allCodes += `Grade ${g}: ${masterQuiz[g].code} (Unlocked by finishing Grade ${g})\n`;
+        }
+        alert("--- ADMIN CODE LIST ---\n" + allCodes);
+    }
+</script>
 </body>
 </html>

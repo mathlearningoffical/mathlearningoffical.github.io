@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings | EduQuest</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 50px; text-align: center; }
+        .box { background: white; padding: 30px; border-radius: 15px; max-width: 400px; margin: auto; }
+        button { background: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Settings ⚙️</h2>
+        <p id="user-email"></p>
+        <hr>
+        <h3>Security</h3>
+        <button onclick="resetPassword()">Send Password Reset Email</button>
+        <br><br>
+        <button onclick="location.href='index.html'" style="background: #95a5a6;">Back to Game</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script>
+        const firebaseConfig = { /* PASTE YOUR CONFIG HERE */ };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged(user => {
+            if (user) document.getElementById('user-email').innerText = user.email;
+            else location.href = "index.html";
+        });
+
+        function resetPassword() {
+            const email = auth.currentUser.email;
+            auth.sendPasswordResetEmail(email)
+                .then(() => alert("Reset link sent to your Gmail!"))
+                .catch(e => alert(e.message));
+        }
+    </script>
+    <div class="navbar">
+    <div class="nav-logo">🚀 EduQuest</div>
+    <div class="nav-links">
+        <a href="leaderboard.html" style="margin-right: 15px; text-decoration: none; color: #4a90e2;">🏆 Leaderboard</a>
+        <span id="admin-btn" class="hidden"><a href="#" onclick="showAdminPanel()" style="color: red; margin-right: 15px;">👑 Admin</a></span>
+    </div>
+    <div class="nav-right">
+        <span class="settings-gear" onclick="location.href='settings.html'">⚙️</span>
+    </div>
+</div>
+
+<script>
+    // Inside your onAuthStateChanged(user => { ... })
+    if (user) {
+        // ADMIN CHECK (Replace with your actual email)
+        if (user.email === "youradmin@gmail.com") {
+            document.getElementById('admin-btn').classList.remove('hidden');
+        }
+    }
+
+    function showAdminPanel() {
+        let allCodes = "";
+        // This is a simple version - it shows the codes in an alert
+        for (let g in masterQuiz) {
+            allCodes += `Grade ${g}: ${masterQuiz[g].code} (Unlocked by finishing Grade ${g})\n`;
+        }
+        alert("--- ADMIN CODE LIST ---\n" + allCodes);
+    }
+</script>
+</body>
+</html>
